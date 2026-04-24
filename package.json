@@ -1,0 +1,120 @@
+{
+  "name": "pivotcli",
+  "displayName": "PivotCLI",
+  "description": "Sidebar panel to launch CLI tools like Gemini CLI, Opencode, and Kilo Code CLI",
+  "version": "0.0.1",
+  "publisher": "YOUR_PUBLISHER_ID",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/PivotCLI"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "icon": "images/icon.png",
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pivotcli.newSession",
+        "title": "New Session",
+        "icon": "$(add)"
+      },
+      {
+        "command": "pivotcli.openGemini",
+        "title": "GEMINI CLI"
+      },
+      {
+        "command": "pivotcli.openGeminiYolo",
+        "title": "GEMINI CLI - YOLO"
+      },
+      {
+        "command": "pivotcli.openOpencode",
+        "title": "OPENCODE"
+      },
+      {
+        "command": "pivotcli.openKilo",
+        "title": "KILO CODE CLI"
+      },
+      {
+        "command": "pivotcli.showSessions",
+        "title": "Session History",
+        "icon": "$(history)"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "pivotcli.newMenu",
+        "label": "New Session",
+        "icon": "$(add)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "submenu": "pivotcli.newMenu",
+          "when": "view == pivotcli.panel",
+          "group": "navigation@1"
+        },
+        {
+          "command": "pivotcli.showSessions",
+          "when": "view == pivotcli.panel",
+          "group": "navigation@3"
+        }
+      ],
+      "pivotcli.newMenu": [
+        {
+          "command": "pivotcli.openGemini",
+          "group": "1_sessions@1"
+        },
+        {
+          "command": "pivotcli.openGeminiYolo",
+          "group": "1_sessions@2"
+        },
+        {
+          "command": "pivotcli.openOpencode",
+          "group": "1_sessions@3"
+        },
+        {
+          "command": "pivotcli.openKilo",
+          "group": "1_sessions@4"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pivotcli",
+          "title": "PivotCLI",
+          "icon": "images/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "pivotcli": [
+        {
+          "type": "webview",
+          "id": "pivotcli.panel",
+          "name": "PivotCLI"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "dependencies": {
+    "@xterm/xterm": "^5.5.0",
+    "@xterm/addon-fit": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
