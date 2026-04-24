@@ -140,11 +140,11 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
   }
 
   public launch(cmd: string) {
-    this.post({ command: "reset" });
     const label = cmd === "gemini" ? "GEMINI CLI"
       : cmd === "gemini -y" ? "GEMINI CLI (YOLO)"
       : cmd === "opencode" ? "OPENCODE"
       : "KILO CODE CLI";
+    // Show loading immediately so the user never sees "[Process exited]"
     this.post({ command: "loading", label });
     this.saveSession(cmd, label);
     this.spawnPty(cmd);
@@ -158,8 +158,12 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
   }
 
   private spawnPty(cmd: string) {
-    this.killPty();
-    this.post({ command: "show-terminal" });
+    // Kill old process but detach its event handlers first
+    if (this.ptyProcess) {
+      const old = this.ptyProcess;
+      this.ptyProcess = undefined;
+      try { old.kill(); } catch {}
+    }
 
     const isWin = os.platform() === "win32";
     const shell = isWin ? "powershell.exe" : "/bin/bash";
@@ -176,13 +180,19 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         env: { ...process.env } as Record<string, string>,
       });
 
+      const currentPty = this.ptyProcess;
+
       this.ptyProcess.onData((data: string) => {
-        this.post({ command: "output", data });
+        if (this.ptyProcess === currentPty) {
+          this.post({ command: "output", data });
+        }
       });
 
       this.ptyProcess.onExit(() => {
-        this.post({ command: "exit" });
-        this.ptyProcess = undefined;
+        if (this.ptyProcess === currentPty) {
+          this.post({ command: "exit" });
+          this.ptyProcess = undefined;
+        }
       });
     } catch (err: any) {
       this.post({

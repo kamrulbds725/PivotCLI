@@ -51,6 +51,8 @@ export function getHtml(
 
     #terminal-container { display: none; width: 100%; height: 100%; padding: 8px 10px; overflow: hidden; }
     #terminal-container .xterm { width: 100% !important; }
+    #terminal-container .xterm-cursor-bar { animation: cursor-blink 1s step-end infinite; }
+    @keyframes cursor-blink { 50% { opacity: 0; } }
     #terminal-container .xterm-viewport { width: 100% !important; overflow-y: hidden !important; }
     #terminal-container .xterm-viewport::-webkit-scrollbar { display: none; }
   </style>
@@ -95,15 +97,17 @@ export function getHtml(
     function initTerm() {
       if (term) term.dispose();
       term = new Terminal({
-        cursorBlink: true,
-        fontSize: 14,
+        cursorBlink: false,
+        cursorStyle: "bar",
+        cursorInactiveStyle: "none",
+        fontSize: 13,
         fontWeight: "normal",
         fontWeightBold: "bold",
         letterSpacing: 0,
         lineHeight: 1.0,
         convertEol: false,
         fontFamily: "'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
-        theme: { background: "#1a1b1e" }
+        theme: { background: "#1a1b1e", cursor: "rgba(255,255,255,0.6)", cursorAccent: "transparent" }
       });
       fitAddon = new FitAddon.FitAddon();
       term.loadAddon(fitAddon);
@@ -153,6 +157,9 @@ export function getHtml(
         termDiv.style.display = "none";
       } else if (msg.command === "loading") {
         gotFirstOutput = false;
+        if (term) { term.dispose(); term = null; fitAddon = null; }
+        buttonsDiv.style.display = "none";
+        termDiv.style.display = "none";
         loadingText.textContent = "Loading " + msg.label + "...";
         loadingDiv.style.display = "flex";
       } else if (msg.command === "show-terminal") {
