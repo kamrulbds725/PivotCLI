@@ -100,7 +100,7 @@ export function getHtml(
         cursorBlink: false,
         cursorStyle: "bar",
         cursorInactiveStyle: "none",
-        fontSize: 13,
+        fontSize: 14.2,
         fontWeight: "normal",
         fontWeightBold: "bold",
         letterSpacing: 0,
