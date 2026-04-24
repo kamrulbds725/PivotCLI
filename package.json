@@ -3,10 +3,10 @@
   "displayName": "PivotCLI",
   "description": "Sidebar panel to launch CLI tools like Gemini CLI, Opencode, and Kilo Code CLI",
   "version": "0.0.1",
-  "publisher": "YOUR_PUBLISHER_ID",
+  "publisher": "KamrulHasan",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/PivotCLI"
+    "url": "https://github.com/kamrulbds725/PivotCLI"
   },
   "license": "MIT",
   "engines": {

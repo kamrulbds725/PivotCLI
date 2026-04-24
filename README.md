@@ -29,7 +29,7 @@ The CLI tools you want to use must be installed and available on your PATH:
 ### From Source
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/PivotCLI.git
+git clone https://github.com/kamrulbds725/PivotCLI.git
 cd PivotCLI
 npm install
 npm run compile
