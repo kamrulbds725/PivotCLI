@@ -2,7 +2,9 @@
 
 A VS Code extension that gives you a sidebar panel to launch CLI-based AI coding tools — Gemini CLI, Opencode, and Kilo Code CLI — right inside your editor.
 
-![PivotCLI](images/icon.png)
+<p align="center">
+  <img src="images/icon.png" alt="PivotCLI" width="128">
+</p>
 
 ## Features
 
