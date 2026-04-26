@@ -15,6 +15,13 @@ interface Session {
   timestamp: number;
 }
 
+interface Tab {
+  id: number;
+  label: string;
+  cmd: string;
+  pty: any;
+}
+
 let ptyModule: any;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -38,10 +45,14 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("pivotcli.newSession", async () => {
       const picked = await vscode.window.showQuickPick(
         [
-          { label: "GEMINI CLI", cmd: "gemini" },
-          { label: "GEMINI CLI - YOLO", cmd: "gemini -y" },
-          { label: "OPENCODE", cmd: "opencode" },
-          { label: "KILO CODE CLI", cmd: "kilo" },
+          { label: "Gemini", cmd: "gemini" },
+          { label: "Gemini — YOLO", cmd: "gemini -y" },
+          { label: "Claude", cmd: "claude" },
+          { label: "Claude — YOLO", cmd: "claude --dangerously-skip-permissions" },
+          { label: "Codex", cmd: "codex" },
+          { label: "Codex — YOLO", cmd: "codex --dangerously-bypass-approvals-and-sandbox" },
+          { label: "OpenCode", cmd: "opencode" },
+          { label: "KiloCode", cmd: "kilo" },
         ],
         { placeHolder: "Select a session type" }
       );
@@ -54,6 +65,18 @@ export function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("pivotcli.openGeminiYolo", () => {
       provider.launch("gemini -y");
+    }),
+    vscode.commands.registerCommand("pivotcli.openClaude", () => {
+      provider.launch("claude");
+    }),
+    vscode.commands.registerCommand("pivotcli.openClaudeYolo", () => {
+      provider.launch("claude --dangerously-skip-permissions");
+    }),
+    vscode.commands.registerCommand("pivotcli.openCodex", () => {
+      provider.launch("codex");
+    }),
+    vscode.commands.registerCommand("pivotcli.openCodexYolo", () => {
+      provider.launch("codex --dangerously-bypass-approvals-and-sandbox");
     }),
     vscode.commands.registerCommand("pivotcli.openOpencode", () => {
       provider.launch("opencode");
@@ -86,7 +109,9 @@ export function deactivate() {}
 
 class PivotCLIProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
-  private ptyProcess?: any;
+  private tabs: Map<number, Tab> = new Map();
+  private activeTabId: number = -1;
+  private nextTabId: number = 1;
 
   constructor(private readonly ctx: vscode.ExtensionContext) {}
 
@@ -119,6 +144,18 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         case "open-gemini-yolo":
           this.launch("gemini -y");
           break;
+        case "open-claude":
+          this.launch("claude");
+          break;
+        case "open-claude-yolo":
+          this.launch("claude --dangerously-skip-permissions");
+          break;
+        case "open-codex":
+          this.launch("codex");
+          break;
+        case "open-codex-yolo":
+          this.launch("codex --dangerously-bypass-approvals-and-sandbox");
+          break;
         case "open-opencode":
           this.launch("opencode");
           break;
@@ -126,28 +163,63 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
           this.launch("kilo");
           break;
         case "input":
-          this.ptyProcess?.write(msg.data);
+          if (msg.tabId !== undefined) {
+            this.tabs.get(msg.tabId)?.pty?.write(msg.data);
+          }
           break;
         case "resize":
-          if (msg.cols > 0 && msg.rows > 0) {
-            try { this.ptyProcess?.resize(msg.cols, msg.rows); } catch {}
+          if (msg.tabId !== undefined && msg.cols > 0 && msg.rows > 0) {
+            try { this.tabs.get(msg.tabId)?.pty?.resize(msg.cols, msg.rows); } catch {}
           }
+          break;
+        case "switch-tab":
+          this.activeTabId = msg.tabId;
+          break;
+        case "close-tab":
+          this.closeTab(msg.tabId);
           break;
       }
     });
 
-    webviewView.onDidDispose(() => this.killPty());
+    webviewView.onDidDispose(() => this.killAllPty());
   }
 
   public launch(cmd: string) {
-    const label = cmd === "gemini" ? "GEMINI CLI"
-      : cmd === "gemini -y" ? "GEMINI CLI (YOLO)"
-      : cmd === "opencode" ? "OPENCODE"
-      : "KILO CODE CLI";
-    // Show loading immediately so the user never sees "[Process exited]"
-    this.post({ command: "loading", label });
+    const labels: Record<string, string> = {
+      "gemini": "Gemini",
+      "gemini -y": "Gemini YOLO",
+      "claude": "Claude",
+      "claude --dangerously-skip-permissions": "Claude YOLO",
+      "codex": "Codex",
+      "codex --dangerously-bypass-approvals-and-sandbox": "Codex YOLO",
+      "opencode": "OpenCode",
+      "kilo": "KiloCode",
+    };
+    const label = labels[cmd] || cmd;
+
+    const tabId = this.nextTabId++;
+    const tab: Tab = { id: tabId, label, cmd, pty: null };
+    this.tabs.set(tabId, tab);
+    this.activeTabId = tabId;
+
     this.saveSession(cmd, label);
-    this.spawnPty(cmd);
+    this.post({ command: "new-tab", tabId, label });
+    this.spawnPty(tab);
+  }
+
+  private closeTab(tabId: number) {
+    const tab = this.tabs.get(tabId);
+    if (tab?.pty) {
+      try { tab.pty.kill(); } catch {}
+    }
+    this.tabs.delete(tabId);
+
+    if (this.activeTabId === tabId) {
+      const remaining = Array.from(this.tabs.keys());
+      this.activeTabId = remaining.length > 0 ? remaining[remaining.length - 1] : -1;
+    }
+
+    this.post({ command: "tab-closed", tabId, switchTo: this.activeTabId });
   }
 
   private saveSession(cmd: string, label: string) {
@@ -157,22 +229,15 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
     this.ctx.globalState.update("pivotcli.sessions", sessions);
   }
 
-  private spawnPty(cmd: string) {
-    // Kill old process but detach its event handlers first
-    if (this.ptyProcess) {
-      const old = this.ptyProcess;
-      this.ptyProcess = undefined;
-      try { old.kill(); } catch {}
-    }
-
+  private spawnPty(tab: Tab) {
     const isWin = os.platform() === "win32";
     const shell = isWin ? "powershell.exe" : "/bin/bash";
-    const shellArgs = isWin ? ["-NoProfile", "-NoExit", "-Command", cmd] : ["-c", cmd];
+    const shellArgs = isWin ? ["-NoProfile", "-NoExit", "-Command", tab.cmd] : ["-c", tab.cmd];
     const cwd =
       vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
 
     try {
-      this.ptyProcess = ptyModule.spawn(shell, shellArgs, {
+      tab.pty = ptyModule.spawn(shell, shellArgs, {
         name: "xterm-256color",
         cols: 80,
         rows: 24,
@@ -180,33 +245,29 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         env: { ...process.env } as Record<string, string>,
       });
 
-      const currentPty = this.ptyProcess;
-
-      this.ptyProcess.onData((data: string) => {
-        if (this.ptyProcess === currentPty) {
-          this.post({ command: "output", data });
-        }
+      tab.pty.onData((data: string) => {
+        this.post({ command: "output", tabId: tab.id, data });
       });
 
-      this.ptyProcess.onExit(() => {
-        if (this.ptyProcess === currentPty) {
-          this.post({ command: "exit" });
-          this.ptyProcess = undefined;
-        }
+      tab.pty.onExit(() => {
+        this.post({ command: "exit", tabId: tab.id });
       });
     } catch (err: any) {
       this.post({
         command: "output",
+        tabId: tab.id,
         data: `\r\nError spawning process: ${err.message}\r\n`,
       });
     }
   }
 
-  private killPty() {
-    if (this.ptyProcess) {
-      try { this.ptyProcess.kill(); } catch {}
-      this.ptyProcess = undefined;
+  private killAllPty() {
+    for (const tab of this.tabs.values()) {
+      if (tab.pty) {
+        try { tab.pty.kill(); } catch {}
+      }
     }
+    this.tabs.clear();
   }
 
   private post(msg: unknown) {

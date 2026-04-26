@@ -1,9 +1,7 @@
 src/**
 tsconfig.json
 .vscode/**
-gemcli/**
 node_modules/@types/**
 node_modules/typescript/**
 .gitignore
 *.vsix
-README.md

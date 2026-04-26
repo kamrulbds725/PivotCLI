@@ -1,8 +1,8 @@
 {
   "name": "pivotcli",
   "displayName": "PivotCLI",
-  "description": "Sidebar panel to launch CLI tools like Gemini CLI, Opencode, and Kilo Code CLI",
-  "version": "0.0.2",
+  "description": "Sidebar panel to launch AI coding CLI tools — Gemini, Claude, Codex, OpenCode, and KiloCode — with multi-tab support",
+  "version": "1.0.0",
   "publisher": "KamrulHasan",
   "repository": {
     "type": "git",
@@ -27,19 +27,35 @@
       },
       {
         "command": "pivotcli.openGemini",
-        "title": "GEMINI CLI"
+        "title": "Gemini"
       },
       {
         "command": "pivotcli.openGeminiYolo",
-        "title": "GEMINI CLI - YOLO"
+        "title": "Gemini — YOLO"
+      },
+      {
+        "command": "pivotcli.openClaude",
+        "title": "Claude"
+      },
+      {
+        "command": "pivotcli.openClaudeYolo",
+        "title": "Claude — YOLO"
+      },
+      {
+        "command": "pivotcli.openCodex",
+        "title": "Codex"
+      },
+      {
+        "command": "pivotcli.openCodexYolo",
+        "title": "Codex — YOLO"
       },
       {
         "command": "pivotcli.openOpencode",
-        "title": "OPENCODE"
+        "title": "OpenCode"
       },
       {
         "command": "pivotcli.openKilo",
-        "title": "KILO CODE CLI"
+        "title": "KiloCode"
       },
       {
         "command": "pivotcli.showSessions",
@@ -47,42 +63,12 @@
         "icon": "$(history)"
       }
     ],
-    "submenus": [
-      {
-        "id": "pivotcli.newMenu",
-        "label": "New Session",
-        "icon": "$(add)"
-      }
-    ],
     "menus": {
       "view/title": [
-        {
-          "submenu": "pivotcli.newMenu",
-          "when": "view == pivotcli.panel",
-          "group": "navigation@1"
-        },
         {
           "command": "pivotcli.showSessions",
           "when": "view == pivotcli.panel",
           "group": "navigation@3"
-        }
-      ],
-      "pivotcli.newMenu": [
-        {
-          "command": "pivotcli.openGemini",
-          "group": "1_sessions@1"
-        },
-        {
-          "command": "pivotcli.openGeminiYolo",
-          "group": "1_sessions@2"
-        },
-        {
-          "command": "pivotcli.openOpencode",
-          "group": "1_sessions@3"
-        },
-        {
-          "command": "pivotcli.openKilo",
-          "group": "1_sessions@4"
         }
       ]
     },
