@@ -222,6 +222,9 @@ export function getHtml(
     <button class="launch-btn" id="btn-kilo">
       <span class="btn-icon" style="background:#ea4335"></span>KiloCode<span class="btn-arrow">&#9656;</span>
     </button>
+    <button class="launch-btn" id="btn-command-code">
+      <span class="btn-icon" style="background:#7c3aed"></span>CommandCode<span class="btn-arrow">&#9656;</span>
+    </button>
   </div>
   <div id="loading">
     <div class="spinner"></div>
@@ -466,6 +469,8 @@ export function getHtml(
       vscode.postMessage({ command: "open-opencode" });
     document.getElementById("btn-kilo").onclick = () =>
       vscode.postMessage({ command: "open-kilo" });
+    document.getElementById("btn-command-code").onclick = () =>
+      vscode.postMessage({ command: "open-command-code" });
 
     // Plus button creates a "New Tab" showing homepage
     const addBtn = document.getElementById("add-tab-btn");

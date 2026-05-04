@@ -53,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
           { label: "Codex — YOLO", cmd: "codex --dangerously-bypass-approvals-and-sandbox" },
           { label: "OpenCode", cmd: "opencode" },
           { label: "KiloCode", cmd: "kilo" },
+          { label: "CommandCode", cmd: "npx command-code" },
         ],
         { placeHolder: "Select a session type" }
       );
@@ -83,6 +84,9 @@ export function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("pivotcli.openKilo", () => {
       provider.launch("kilo");
+    }),
+    vscode.commands.registerCommand("pivotcli.openCommandCode", () => {
+      provider.launch("npx command-code");
     }),
     vscode.commands.registerCommand("pivotcli.showSessions", async () => {
       const sessions: Session[] = context.globalState.get("pivotcli.sessions", []);
@@ -162,6 +166,9 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         case "open-kilo":
           this.launch("kilo");
           break;
+        case "open-command-code":
+          this.launch("npx command-code");
+          break;
         case "input":
           if (msg.tabId !== undefined) {
             this.tabs.get(msg.tabId)?.pty?.write(msg.data);
@@ -194,6 +201,7 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
       "codex --dangerously-bypass-approvals-and-sandbox": "Codex YOLO",
       "opencode": "OpenCode",
       "kilo": "KiloCode",
+      "npx command-code": "CommandCode",
     };
     const label = labels[cmd] || cmd;
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Added CommandCode support
+
 ## 1.0.0
 
 - Multi-tab support — run multiple CLI sessions simultaneously
