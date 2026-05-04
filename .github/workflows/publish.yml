@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Bump patch version
+        run: npm version patch --no-git-tag-version
+
       - name: Compile
         run: npm run compile
 
