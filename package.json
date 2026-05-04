@@ -62,6 +62,10 @@
         "title": "CommandCode"
       },
       {
+        "command": "pivotcli.openCommandCodeYolo",
+        "title": "CommandCode — YOLO"
+      },
+      {
         "command": "pivotcli.showSessions",
         "title": "Session History",
         "icon": "$(history)"

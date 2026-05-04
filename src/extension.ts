@@ -54,6 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
           { label: "OpenCode", cmd: "opencode" },
           { label: "KiloCode", cmd: "kilo" },
           { label: "CommandCode", cmd: "npx command-code" },
+          { label: "CommandCode — YOLO", cmd: "npx command-code --yolo" },
         ],
         { placeHolder: "Select a session type" }
       );
@@ -87,6 +88,9 @@ export function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("pivotcli.openCommandCode", () => {
       provider.launch("npx command-code");
+    }),
+    vscode.commands.registerCommand("pivotcli.openCommandCodeYolo", () => {
+      provider.launch("npx command-code --yolo");
     }),
     vscode.commands.registerCommand("pivotcli.showSessions", async () => {
       const sessions: Session[] = context.globalState.get("pivotcli.sessions", []);
@@ -169,6 +173,9 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         case "open-command-code":
           this.launch("npx command-code");
           break;
+        case "open-command-code-yolo":
+          this.launch("npx command-code --yolo");
+          break;
         case "input":
           if (msg.tabId !== undefined) {
             this.tabs.get(msg.tabId)?.pty?.write(msg.data);
@@ -202,6 +209,7 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
       "opencode": "OpenCode",
       "kilo": "KiloCode",
       "npx command-code": "CommandCode",
+      "npx command-code --yolo": "CommandCode YOLO",
     };
     const label = labels[cmd] || cmd;
 

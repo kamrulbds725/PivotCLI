@@ -17,7 +17,7 @@ Supports Gemini, Claude, Codex, OpenCode, KiloCode, and CommandCode.
 | [Codex CLI](https://github.com/openai/codex) | `codex` | `codex --dangerously-bypass-approvals-and-sandbox` |
 | [OpenCode](https://github.com/opencode-ai/opencode) | `opencode` | — |
 | [KiloCode](https://github.com/kilocode/kilo) | `kilo` | — |
-| [CommandCode](https://github.com/CommandCode/command-code) | `npx command-code` | — |
+| [CommandCode](https://github.com/CommandCode/command-code) | `npx command-code` | `npx command-code --yolo` |
 
 ## Features
 
