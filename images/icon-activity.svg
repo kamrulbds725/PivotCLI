@@ -1,9 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <!-- Rounded square outline (green border from main icon) -->
-  <rect x="1" y="1" width="22" height="22" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <!-- Chat bubble (upper-left) -->
-  <ellipse cx="9" cy="9" rx="5" ry="4" fill="currentColor"/>
-  <polygon points="7,13 6,16 10,13" fill="currentColor"/>
-  <!-- Terminal cursor dash (right side) -->
-  <rect x="14" y="11" width="6" height="2" rx="1" fill="currentColor"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <!-- Rounded square border (filled outer minus inner cutout via path) -->
+  <path d="M5 1h14a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4V5a4 4 0 0 1 4-4zm0 1.5A2.5 2.5 0 0 0 2.5 5v14A2.5 2.5 0 0 0 5 21.5h14a2.5 2.5 0 0 0 2.5-2.5V5A2.5 2.5 0 0 0 19 2.5H5z"/>
+  <!-- Chat bubble body -->
+  <ellipse cx="9" cy="9.5" rx="5" ry="4"/>
+  <!-- Chat bubble tail -->
+  <polygon points="7,13.5 5.5,17 10.5,13.5"/>
+  <!-- Terminal cursor dash -->
+  <rect x="14" y="12" width="6" height="2" rx="1"/>
 </svg>
