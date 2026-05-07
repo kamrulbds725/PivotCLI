@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.5
+## 1.0.7
 
 - Fixed activity bar icon showing as a white block — replaced PNG with a transparent SVG that renders correctly with VS Code themes
 
