@@ -2,7 +2,7 @@
 
 A VS Code extension that gives you a sidebar panel to launch AI coding CLI tools — right inside your editor. Run multiple sessions in tabs, switch between them, and multitask.
 
-Supports Gemini, Claude, Codex, OpenCode, KiloCode, and CommandCode.
+Supports Gemini, Claude, Codex, OpenCode, Pi Coding, KiloCode, and CommandCode.
 
 <p align="center">
   <img src="images/icon.png" alt="PivotCLI" width="128">
@@ -16,6 +16,7 @@ Supports Gemini, Claude, Codex, OpenCode, KiloCode, and CommandCode.
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `claude` | `claude --dangerously-skip-permissions` |
 | [Codex CLI](https://github.com/openai/codex) | `codex` | `codex --dangerously-bypass-approvals-and-sandbox` |
 | [OpenCode](https://github.com/opencode-ai/opencode) | `opencode` | — |
+| [Pi Coding](https://pi.dev) | `pi` | — |
 | [KiloCode](https://github.com/kilocode/kilo) | `kilo` | — |
 | [CommandCode](https://github.com/CommandCode/command-code) | `npx command-code` | `npx command-code --yolo` |
 

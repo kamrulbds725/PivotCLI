@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0
+
+- Added Pi Coding support (`pi`) — install via `npm install -g @earendil-works/pi-coding-agent` or [pi.dev](https://pi.dev)
+
 ## 1.0.7
 
 - Fixed activity bar icon showing as a white block — replaced PNG with a transparent SVG that renders correctly with VS Code themes

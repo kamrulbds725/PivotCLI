@@ -219,6 +219,9 @@ export function getHtml(
     <button class="launch-btn" id="btn-opencode">
       <span class="btn-icon" style="background:#34a853"></span>OpenCode<span class="btn-arrow">&#9656;</span>
     </button>
+    <button class="launch-btn" id="btn-pi">
+      <span class="btn-icon" style="background:#6366f1"></span>Pi Coding<span class="btn-arrow">&#9656;</span>
+    </button>
     <button class="launch-btn" id="btn-kilo">
       <span class="btn-icon" style="background:#ea4335"></span>KiloCode<span class="btn-arrow">&#9656;</span>
     </button>
@@ -473,6 +476,8 @@ export function getHtml(
     // Direct launch buttons
     document.getElementById("btn-opencode").onclick = () =>
       vscode.postMessage({ command: "open-opencode" });
+    document.getElementById("btn-pi").onclick = () =>
+      vscode.postMessage({ command: "open-pi" });
     document.getElementById("btn-kilo").onclick = () =>
       vscode.postMessage({ command: "open-kilo" });
 

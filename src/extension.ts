@@ -52,6 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
           { label: "Codex", cmd: "codex" },
           { label: "Codex — YOLO", cmd: "codex --dangerously-bypass-approvals-and-sandbox" },
           { label: "OpenCode", cmd: "opencode" },
+          { label: "Pi Coding", cmd: "pi" },
           { label: "KiloCode", cmd: "kilo" },
           { label: "CommandCode", cmd: "npx command-code" },
           { label: "CommandCode — YOLO", cmd: "npx command-code --yolo" },
@@ -82,6 +83,9 @@ export function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("pivotcli.openOpencode", () => {
       provider.launch("opencode");
+    }),
+    vscode.commands.registerCommand("pivotcli.openPi", () => {
+      provider.launch("pi");
     }),
     vscode.commands.registerCommand("pivotcli.openKilo", () => {
       provider.launch("kilo");
@@ -166,6 +170,9 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
           break;
         case "open-opencode":
           this.launch("opencode");
+          break;
+        case "open-pi":
+          this.launch("pi");
           break;
         case "open-kilo":
           this.launch("kilo");
