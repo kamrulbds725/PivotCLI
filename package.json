@@ -2,7 +2,7 @@
   "name": "pivotcli",
   "displayName": "PivotCLI",
   "description": "Sidebar panel to launch AI coding CLI tools — Gemini, Claude, Codex, OpenCode, Pi Coding, KiloCode, and CommandCode — with multi-tab support",
-  "version": "2.0.0",
+  "version": "2.5.0",
   "publisher": "KamrulHasan",
   "repository": {
     "type": "git",
@@ -101,6 +101,39 @@
           "name": "PivotCLI"
         }
       ]
+    },
+    "configuration": {
+      "title": "PivotCLI",
+      "properties": {
+        "pivotcli.customCLIs": {
+          "type": "array",
+          "default": [],
+          "markdownDescription": "Custom CLI tools to add to the PivotCLI launcher panel. Example:\n```json\n[\n  { \"name\": \"Aider\", \"command\": \"aider\", \"yoloCommand\": \"aider --yes\" },\n  { \"name\": \"Amp\", \"command\": \"amp\", \"color\": \"#ff6b35\" }\n]\n```",
+          "items": {
+            "type": "object",
+            "required": ["name", "command"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Display name shown in the launcher panel"
+              },
+              "command": {
+                "type": "string",
+                "description": "Shell command to run (must be on your PATH)"
+              },
+              "yoloCommand": {
+                "type": "string",
+                "description": "Optional YOLO / unsafe-mode command. When set, the button expands with Normal and YOLO Mode sub-options."
+              },
+              "color": {
+                "type": "string",
+                "description": "Optional dot color in the launcher (any CSS color, e.g. \"#ff6b35\" or \"cyan\"). Defaults to gray."
+              }
+            }
+          }
+        }
+      }
     }
   },
   "scripts": {

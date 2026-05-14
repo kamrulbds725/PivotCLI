@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.5.0
+
+- **Custom CLI support** — add any CLI tool to the launcher via `pivotcli.customCLIs` in VS Code settings (name, command, optional YOLO command, optional color). No extension update needed as new tools launch.
+- **+ Add Custom CLI button** — dashed-border button at the bottom of the homepage opens settings filtered to `pivotcli.customCLIs` in one click
+- **Tab persistence** — open tabs are saved to workspace state and automatically restored after VS Code restarts
+- **Added OpenClaude** — new built-in entry between Pi Coding and KiloCode (`openclaude` / `openclaude --dangerously-skip-permissions`)
+- Redesigned tab bar
+- Improved homepage text contrast — title, subtitle, and hint text are more legible
+
 ## 2.0.0
 
 - Added Pi Coding support (`pi`) — install via `npm install -g @earendil-works/pi-coding-agent` or [pi.dev](https://pi.dev)

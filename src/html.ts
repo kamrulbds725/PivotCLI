@@ -1,10 +1,20 @@
 import * as vscode from "vscode";
 
+export interface CustomCLI {
+  name: string;
+  command: string;
+  yoloCommand?: string;
+  color?: string;
+}
+
 export function getHtml(
   css: vscode.Uri,
   js: vscode.Uri,
-  fit: vscode.Uri
+  fit: vscode.Uri,
+  customCLIs: CustomCLI[] = []
 ): string {
+  // Encode as base64 so any characters in names/commands can't break the JS template
+  const customCLIsB64 = Buffer.from(JSON.stringify(customCLIs)).toString("base64");
   return /*html*/ `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +39,7 @@ export function getHtml(
     }
     .home-title {
       font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 1px; color: rgba(255,255,255,0.3);
+      letter-spacing: 1px; color: rgba(255,255,255,0.65);
       margin-bottom: 8px;
     }
     .launch-btn {
@@ -78,40 +88,70 @@ export function getHtml(
       width: 4px; height: 4px; border-radius: 50%;
       background: rgba(255,255,255,0.25); flex-shrink: 0;
     }
+    .custom-sep {
+      width: 100%; max-width: 260px;
+      height: 1px; background: rgba(255,255,255,0.08);
+      margin: 6px 0;
+    }
+    .add-custom-btn {
+      width: 100%; max-width: 260px; padding: 9px 16px;
+      border: 1px dashed rgba(255,255,255,0.13); border-radius: 6px;
+      cursor: pointer; font-size: 11.5px; font-weight: 500;
+      color: rgba(255,255,255,0.3); background: transparent;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      margin-top: 8px;
+    }
+    .add-custom-btn:hover {
+      border-color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.65);
+      background: rgba(255,255,255,0.04);
+    }
+    .add-custom-btn:active { background: rgba(255,255,255,0.07); }
+    .add-custom-btn .add-icon {
+      font-size: 16px; line-height: 1; opacity: 0.7; font-weight: 300;
+    }
+    .add-custom-hint {
+      font-size: 10px; color: rgba(255,255,255,0.45);
+      max-width: 260px; text-align: center; margin-top: 5px;
+      line-height: 1.4;
+    }
 
     #tab-bar {
-      display: none; flex-direction: row; align-items: flex-end;
-      padding: 0 4px; gap: 0;
-      background: rgba(255,255,255,0.02);
+      display: none; flex-direction: row; align-items: stretch;
+      padding: 0; gap: 0;
+      background: rgba(0,0,0,0.15);
       overflow-x: auto; flex-shrink: 0;
       scrollbar-width: none;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
     #tab-bar::-webkit-scrollbar { display: none; }
     #tab-list {
-      display: flex; flex-direction: row; align-items: flex-end;
-      gap: 1px; min-width: 0; overflow-x: auto; flex: 1;
+      display: flex; flex-direction: row; align-items: stretch;
+      gap: 0; min-width: 0; overflow-x: auto; flex: 1;
       scrollbar-width: none;
     }
     #tab-list::-webkit-scrollbar { display: none; }
     .tab {
-      display: flex; align-items: center; gap: 8px;
-      padding: 4px 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+      padding: 0 12px; height: 31px; cursor: pointer;
       font-size: 11px; font-weight: 400;
-      color: rgba(255,255,255,0.5);
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px 8px 0 0;
+      color: rgba(255,255,255,0.4);
+      background: transparent;
+      border-radius: 0;
+      border-right: 1px solid rgba(255,255,255,0.06);
       white-space: nowrap; flex-shrink: 0;
       min-width: 80px; max-width: 180px;
       position: relative;
       transition: color 0.12s, background 0.12s;
     }
     .tab:hover {
-      color: rgba(255,255,255,0.8);
-      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.05);
     }
     .tab.active {
-      color: var(--vscode-foreground);
-      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.08);
       font-weight: 500;
     }
     .tab .tab-label {
@@ -144,14 +184,14 @@ export function getHtml(
 
     #add-tab-btn {
       display: flex; align-items: center; justify-content: center;
-      width: 28px; height: 28px; border-radius: 50%;
+      width: 32px; height: 31px; border-radius: 0;
       border: none; background: transparent;
-      color: rgba(255,255,255,0.4); cursor: pointer;
-      font-size: 18px; line-height: 1;
-      margin-left: 4px; margin-bottom: 0; flex-shrink: 0;
-      transition: background 0.12s, color 0.12s, transform 0.2s;
+      color: rgba(255,255,255,0.35); cursor: pointer;
+      font-size: 16px; line-height: 1;
+      flex-shrink: 0;
+      transition: background 0.12s, color 0.12s;
     }
-    #add-tab-btn:hover { background: rgba(255,255,255,0.08); color: var(--vscode-foreground); }
+    #add-tab-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
 
     #loading {
       display: none; flex: 1;
@@ -184,7 +224,7 @@ export function getHtml(
   <div id="tab-bar"><div id="tab-list"></div><button id="add-tab-btn">+</button></div>
   <div id="buttons">
     <div class="home-title">Launch a CLI</div>
-    <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:-4px;margin-bottom:10px;">CLIs must be installed on your system before use</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:-4px;margin-bottom:10px;">CLIs must be installed on your system before use</div>
 
     <div class="btn-group">
       <button class="launch-btn expandable" data-group="gemini">
@@ -222,6 +262,15 @@ export function getHtml(
     <button class="launch-btn" id="btn-pi">
       <span class="btn-icon" style="background:#6366f1"></span>Pi Coding<span class="btn-arrow">&#9656;</span>
     </button>
+    <div class="btn-group">
+      <button class="launch-btn expandable" data-group="openclaude">
+        <span class="btn-icon" style="background:#c084fc"></span>OpenClaude<span class="btn-arrow">&#9656;</span>
+      </button>
+      <div class="sub-items" data-for="openclaude">
+        <button class="sub-item" data-cmd="open-openclaude"><span class="sub-dot"></span>Normal</button>
+        <button class="sub-item" data-cmd="open-openclaude-yolo"><span class="sub-dot"></span>YOLO Mode</button>
+      </div>
+    </div>
     <button class="launch-btn" id="btn-kilo">
       <span class="btn-icon" style="background:#ea4335"></span>KiloCode<span class="btn-arrow">&#9656;</span>
     </button>
@@ -234,6 +283,12 @@ export function getHtml(
         <button class="sub-item" data-cmd="open-command-code-yolo"><span class="sub-dot"></span>YOLO Mode</button>
       </div>
     </div>
+
+    <div id="custom-clis"></div>
+    <button id="add-custom-cli-btn" class="add-custom-btn" title="Opens pivotcli.customCLIs in VS Code Settings">
+      <span class="add-icon">+</span> Add Custom CLI
+    </button>
+    <div class="add-custom-hint">Saved to <code style="font-size:9.5px;opacity:0.7">pivotcli.customCLIs</code> in settings</div>
   </div>
   <div id="loading">
     <div class="spinner"></div>
@@ -243,6 +298,7 @@ export function getHtml(
 
   <script src="${js}"></script>
   <script src="${fit}"></script>
+  <script>const _customCLIs = JSON.parse(atob("${customCLIsB64}"));</script>
   <script>
     const vscode = acquireVsCodeApi();
     const buttonsDiv = document.getElementById("buttons");
@@ -480,7 +536,86 @@ export function getHtml(
       vscode.postMessage({ command: "open-pi" });
     document.getElementById("btn-kilo").onclick = () =>
       vscode.postMessage({ command: "open-kilo" });
+    document.getElementById("add-custom-cli-btn").onclick = () =>
+      vscode.postMessage({ command: "open-custom-settings" });
 
+    // Custom CLIs (from pivotcli.customCLIs setting)
+    function renderCustomCLIs(customs) {
+      const container = document.getElementById("custom-clis");
+      container.innerHTML = "";
+      if (!customs || !customs.length) { return; }
+
+      const sep = document.createElement("div");
+      sep.className = "custom-sep";
+      container.appendChild(sep);
+
+      customs.forEach(function(cli) {
+        // Validate color to prevent CSS injection
+        const color = /^[a-zA-Z0-9#(),. %]+$/.test(cli.color || "") ? cli.color : "#888888";
+
+        function makeBtn(label, withArrow) {
+          const btn = document.createElement("button");
+          btn.className = "launch-btn";
+          const icon = document.createElement("span");
+          icon.className = "btn-icon";
+          icon.style.background = color;
+          btn.appendChild(icon);
+          btn.appendChild(document.createTextNode(label));
+          if (withArrow) {
+            const arrow = document.createElement("span");
+            arrow.className = "btn-arrow";
+            arrow.innerHTML = "&#9656;";
+            btn.appendChild(arrow);
+          }
+          return btn;
+        }
+
+        function makeSubItem(displayText, cmd, label) {
+          const item = document.createElement("button");
+          item.className = "sub-item";
+          const dot = document.createElement("span");
+          dot.className = "sub-dot";
+          item.appendChild(dot);
+          item.appendChild(document.createTextNode(displayText));
+          item.addEventListener("click", function() {
+            vscode.postMessage({ command: "open-custom", cmd: cmd, label: label });
+          });
+          return item;
+        }
+
+        if (cli.yoloCommand) {
+          const group = document.createElement("div");
+          group.className = "btn-group";
+
+          const mainBtn = makeBtn(cli.name, true);
+          mainBtn.classList.add("expandable");
+
+          const subItems = document.createElement("div");
+          subItems.className = "sub-items";
+          subItems.appendChild(makeSubItem("Normal", cli.command, cli.name));
+          subItems.appendChild(makeSubItem("YOLO Mode", cli.yoloCommand, cli.name + " YOLO"));
+
+          mainBtn.addEventListener("click", function() {
+            const isOpen = subItems.classList.contains("open");
+            document.querySelectorAll(".sub-items.open").forEach(function(s) { s.classList.remove("open"); });
+            document.querySelectorAll(".launch-btn.expanded").forEach(function(b) { b.classList.remove("expanded"); });
+            if (!isOpen) { subItems.classList.add("open"); mainBtn.classList.add("expanded"); }
+          });
+
+          group.appendChild(mainBtn);
+          group.appendChild(subItems);
+          container.appendChild(group);
+        } else {
+          const btn = makeBtn(cli.name, true);
+          btn.addEventListener("click", function() {
+            vscode.postMessage({ command: "open-custom", cmd: cli.command, label: cli.name });
+          });
+          container.appendChild(btn);
+        }
+      });
+    }
+
+    renderCustomCLIs(_customCLIs);
 
     // Plus button creates a "New Tab" showing homepage
     const addBtn = document.getElementById("add-tab-btn");
@@ -532,7 +667,9 @@ export function getHtml(
     window.addEventListener("message", e => {
       const msg = e.data;
 
-      if (msg.command === "new-tab") {
+      if (msg.command === "update-custom-clis") {
+        renderCustomCLIs(msg.customCLIs || []);
+      } else if (msg.command === "new-tab") {
         createTab(msg.tabId, msg.label);
       } else if (msg.command === "output") {
         const t = tabs.get(msg.tabId);
