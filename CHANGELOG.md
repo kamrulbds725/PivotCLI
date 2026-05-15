@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.1
+
+- Removed "Saved to pivotcli.customCLIList in settings" hint text from the launcher panel
+- Renamed setting key from `pivotcli.customCLIs` to `pivotcli.customCLIList` for correct display in VS Code Settings UI
+- Reordered built-in CLIs: Claude and Codex now appear before Gemini
+
 ## 2.5.0
 
 - **Custom CLI support** — add any CLI tool to the launcher via `pivotcli.customCLIs` in VS Code settings (name, command, optional YOLO command, optional color). No extension update needed as new tools launch.

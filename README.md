@@ -2,7 +2,7 @@
 
 A VS Code extension that gives you a sidebar panel to launch AI coding CLI tools — right inside your editor. Run multiple sessions in tabs, switch between them, and multitask.
 
-Supports Gemini, Claude, Codex, OpenCode, Pi Coding, OpenClaude, KiloCode, CommandCode — and any custom CLI you configure.
+Supports Claude, Codex, Gemini, OpenCode, Pi Coding, OpenClaude, KiloCode, CommandCode — and any custom CLI you configure.
 
 <p align="center">
   <img src="images/Screenshot_2.png" alt="PivotCLI homepage" width="320">
@@ -14,11 +14,11 @@ Supports Gemini, Claude, Codex, OpenCode, Pi Coding, OpenClaude, KiloCode, Comma
 
 | CLI | Normal | YOLO Mode |
 |-----|--------|-----------|
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | `gemini` | `gemini -y` |
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `claude` | `claude --dangerously-skip-permissions` |
 | [Codex CLI](https://github.com/openai/codex) | `codex` | `codex --dangerously-bypass-approvals-and-sandbox` |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | `gemini` | `gemini -y` |
 | [OpenCode](https://github.com/opencode-ai/opencode) | `opencode` | — |
-| [Pi Coding](https://pi.dev) | `pi` | — |
+| [Pi Coding](https://pi.dev) | `pi` | `pi` |
 | [OpenClaude](https://github.com/badkobzaar/openclaudecodecli) | `openclaude` | `openclaude --dangerously-skip-permissions` |
 | [KiloCode](https://github.com/kilocode/kilo) | `kilo` | — |
 | [CommandCode](https://github.com/CommandCode/command-code) | `npx command-code` | `npx command-code --yolo` |

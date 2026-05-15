@@ -227,16 +227,6 @@ export function getHtml(
     <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:-4px;margin-bottom:10px;">CLIs must be installed on your system before use</div>
 
     <div class="btn-group">
-      <button class="launch-btn expandable" data-group="gemini">
-        <span class="btn-icon" style="background:#4285f4"></span>Gemini<span class="btn-arrow">&#9656;</span>
-      </button>
-      <div class="sub-items" data-for="gemini">
-        <button class="sub-item" data-cmd="open-gemini"><span class="sub-dot"></span>Normal</button>
-        <button class="sub-item" data-cmd="open-gemini-yolo"><span class="sub-dot"></span>YOLO Mode</button>
-      </div>
-    </div>
-
-    <div class="btn-group">
       <button class="launch-btn expandable" data-group="claude">
         <span class="btn-icon" style="background:#d97757"></span>Claude<span class="btn-arrow">&#9656;</span>
       </button>
@@ -253,6 +243,16 @@ export function getHtml(
       <div class="sub-items" data-for="codex">
         <button class="sub-item" data-cmd="open-codex"><span class="sub-dot"></span>Normal</button>
         <button class="sub-item" data-cmd="open-codex-yolo"><span class="sub-dot"></span>YOLO Mode</button>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="launch-btn expandable" data-group="gemini">
+        <span class="btn-icon" style="background:#4285f4"></span>Gemini<span class="btn-arrow">&#9656;</span>
+      </button>
+      <div class="sub-items" data-for="gemini">
+        <button class="sub-item" data-cmd="open-gemini"><span class="sub-dot"></span>Normal</button>
+        <button class="sub-item" data-cmd="open-gemini-yolo"><span class="sub-dot"></span>YOLO Mode</button>
       </div>
     </div>
 
@@ -285,10 +285,9 @@ export function getHtml(
     </div>
 
     <div id="custom-clis"></div>
-    <button id="add-custom-cli-btn" class="add-custom-btn" title="Opens pivotcli.customCLIs in VS Code Settings">
+    <button id="add-custom-cli-btn" class="add-custom-btn" title="Opens pivotcli.customCLIList in VS Code Settings">
       <span class="add-icon">+</span> Add Custom CLI
     </button>
-    <div class="add-custom-hint">Saved to <code style="font-size:9.5px;opacity:0.7">pivotcli.customCLIs</code> in settings</div>
   </div>
   <div id="loading">
     <div class="spinner"></div>

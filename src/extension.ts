@@ -6,7 +6,7 @@ import { getHtml, CustomCLI } from "./html";
 function getCustomCLIs(): CustomCLI[] {
   return vscode.workspace
     .getConfiguration("pivotcli")
-    .get<CustomCLI[]>("customCLIs", []);
+    .get<CustomCLI[]>("customCLIList", []);
 }
 
 function loadNodePty(): any {
@@ -169,7 +169,7 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
 
     this.ctx.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration("pivotcli.customCLIs")) {
+        if (e.affectsConfiguration("pivotcli.customCLIList")) {
           this.view?.webview.postMessage({
             command: "update-custom-clis",
             customCLIs: getCustomCLIs(),
@@ -243,7 +243,7 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         case "open-custom-settings":
           vscode.commands.executeCommand(
             "workbench.action.openSettings",
-            "@ext:KamrulHasan.pivotcli customCLIs"
+            "@ext:KamrulHasan.pivotcli customCLIList"
           );
           break;
       }
