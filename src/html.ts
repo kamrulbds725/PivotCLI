@@ -478,6 +478,65 @@ export function getHtml(
 
       term.onData(data => vscode.postMessage({ command: "input", tabId, data }));
 
+      term.attachCustomKeyEventHandler(function(event) {
+        if (event.type !== 'keydown') return true;
+
+        // Shift+Enter: insert a soft newline.
+        // Pi uses Kitty keyboard protocol (ESC[13;2u); other CLIs use Alt+Enter (ESC CR).
+        if ((event.key === 'Enter' || event.code === 'Enter') && event.shiftKey) {
+          event.preventDefault();
+          var tab = tabs.get(tabId);
+          var isPi = tab && tab.label && tab.label.toLowerCase().indexOf('pi') === 0;
+          var seq = isPi ? "\\x1b[13;2u" : "\\x1b\\r";
+          vscode.postMessage({ command: "input", tabId: tabId, data: seq });
+          return false;
+        }
+
+        // Ctrl+V: paste text or image from clipboard
+        if (event.key === 'v' && event.ctrlKey && !event.altKey) {
+          var p = (typeof navigator.clipboard.read === 'function')
+            ? navigator.clipboard.read()
+            : Promise.reject(new Error('no clipboard.read'));
+          p.then(function(items) {
+            for (var i = 0; i < items.length; i++) {
+              var item = items[i];
+              var imgType = null;
+              for (var j = 0; j < item.types.length; j++) {
+                if (item.types[j].indexOf('image/') === 0) { imgType = item.types[j]; break; }
+              }
+              if (imgType) {
+                (function(it, mt) {
+                  it.getType(mt).then(function(blob) {
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                      var b64 = reader.result.split(',')[1];
+                      vscode.postMessage({ command: "paste-image", tabId: tabId, data: b64, mimeType: mt });
+                    };
+                    reader.readAsDataURL(blob);
+                  });
+                })(item, imgType);
+                return;
+              }
+              if (item.types.indexOf('text/plain') >= 0) {
+                (function(it) {
+                  it.getType('text/plain').then(function(b) { return b.text(); }).then(function(text) {
+                    vscode.postMessage({ command: "input", tabId: tabId, data: text });
+                  });
+                })(item);
+                return;
+              }
+            }
+          }).catch(function() {
+            navigator.clipboard.readText().then(function(text) {
+              if (text) vscode.postMessage({ command: "input", tabId: tabId, data: text });
+            }).catch(function() {});
+          });
+          return false;
+        }
+
+        return true;
+      });
+
       new ResizeObserver(() => {
         if (t.fitAddon && t.el.classList.contains("active")) {
           t.fitAddon.fit();
@@ -662,6 +721,32 @@ export function getHtml(
 
       switchTab(localId);
     };
+
+    // Handle right-click → Paste for images (Ctrl+V is handled per-terminal in attachCustomKeyEventHandler)
+    document.addEventListener('paste', function(event) {
+      if (activeTabId < 0) return;
+      var t = tabs.get(activeTabId);
+      if (!t || t.isNewTab) return;
+      var items = event.clipboardData && event.clipboardData.items;
+      if (!items) return;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image/') === 0) {
+          event.preventDefault();
+          (function(item, mt) {
+            var blob = item.getAsFile();
+            if (!blob) return;
+            var reader = new FileReader();
+            reader.onload = function() {
+              var b64 = reader.result.split(',')[1];
+              vscode.postMessage({ command: "paste-image", tabId: activeTabId, data: b64, mimeType: mt });
+            };
+            reader.readAsDataURL(blob);
+          })(items[i], items[i].type);
+          return;
+        }
+      }
+      // No image — let xterm handle text paste naturally
+    }, true);
 
     window.addEventListener("message", e => {
       const msg = e.data;

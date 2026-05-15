@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as os from "os";
 import * as path from "path";
+import * as fs from "fs";
 import { getHtml, CustomCLI } from "./html";
 
 function getCustomCLIs(): CustomCLI[] {
@@ -246,6 +247,16 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
             "@ext:KamrulHasan.pivotcli customCLIList"
           );
           break;
+        case "paste-image": {
+          const tabId: number = msg.tabId;
+          const b64: string = msg.data;
+          const mimeType: string = typeof msg.mimeType === "string" ? msg.mimeType : "image/png";
+          const ext = (mimeType.split("/")[1] || "png").replace(/[^a-z0-9]/g, "");
+          const tmpFile = path.join(os.tmpdir(), `pivotcli-paste-${Date.now()}.${ext}`);
+          fs.writeFileSync(tmpFile, Buffer.from(b64, "base64"));
+          this.tabs.get(tabId)?.pty?.write(tmpFile);
+          break;
+        }
       }
     });
 

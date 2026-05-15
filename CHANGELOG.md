@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.0
+
+- **Shift+Enter soft newline** — inserts a new line without submitting in all CLIs; Pi Coding uses the Kitty keyboard protocol sequence (`ESC[13;2u`) automatically
+- **Ctrl+V image paste** — paste images from clipboard directly into any CLI that supports it; image is saved to a temp file and the path is sent to the PTY
+- **Right-click Paste image support** — native context-menu Paste now also handles images, not just keyboard Ctrl+V
+
 ## 2.5.1
 
 - Removed "Saved to pivotcli.customCLIList in settings" hint text from the launcher panel
