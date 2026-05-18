@@ -29,6 +29,23 @@ interface Tab {
   pty: any;
 }
 
+interface BuiltinCLI { label: string; cmd: string; msgCmd: string; }
+const BUILTIN_CLIS: BuiltinCLI[] = [
+  { label: "Gemini",             cmd: "gemini",                                           msgCmd: "open-gemini" },
+  { label: "Gemini \u2014 YOLO", cmd: "gemini -y",                                        msgCmd: "open-gemini-yolo" },
+  { label: "Claude",             cmd: "claude",                                            msgCmd: "open-claude" },
+  { label: "Claude \u2014 YOLO", cmd: "claude --dangerously-skip-permissions",             msgCmd: "open-claude-yolo" },
+  { label: "Codex",              cmd: "codex",                                             msgCmd: "open-codex" },
+  { label: "Codex \u2014 YOLO",  cmd: "codex --dangerously-bypass-approvals-and-sandbox",  msgCmd: "open-codex-yolo" },
+  { label: "OpenCode",           cmd: "opencode",                                          msgCmd: "open-opencode" },
+  { label: "Pi Coding",          cmd: "pi",                                                msgCmd: "open-pi" },
+  { label: "OpenClaude",         cmd: "openclaude",                                        msgCmd: "open-openclaude" },
+  { label: "OpenClaude \u2014 YOLO", cmd: "openclaude --dangerously-skip-permissions",    msgCmd: "open-openclaude-yolo" },
+  { label: "KiloCode",           cmd: "kilo",                                              msgCmd: "open-kilo" },
+  { label: "CommandCode",        cmd: "npx command-code",                                  msgCmd: "open-command-code" },
+  { label: "CommandCode \u2014 YOLO", cmd: "npx command-code --yolo",                    msgCmd: "open-command-code-yolo" },
+];
+
 let ptyModule: any;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -50,21 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("pivotcli.newSession", async () => {
-      const builtins = [
-        { label: "Gemini", cmd: "gemini" },
-        { label: "Gemini — YOLO", cmd: "gemini -y" },
-        { label: "Claude", cmd: "claude" },
-        { label: "Claude — YOLO", cmd: "claude --dangerously-skip-permissions" },
-        { label: "Codex", cmd: "codex" },
-        { label: "Codex — YOLO", cmd: "codex --dangerously-bypass-approvals-and-sandbox" },
-        { label: "OpenCode", cmd: "opencode" },
-        { label: "Pi Coding", cmd: "pi" },
-        { label: "OpenClaude", cmd: "openclaude" },
-        { label: "OpenClaude — YOLO", cmd: "openclaude --dangerously-skip-permissions" },
-        { label: "KiloCode", cmd: "kilo" },
-        { label: "CommandCode", cmd: "npx command-code" },
-        { label: "CommandCode — YOLO", cmd: "npx command-code --yolo" },
-      ];
+      const builtins = BUILTIN_CLIS.map(c => ({ label: c.label, cmd: c.cmd }));
       const customs = getCustomCLIs().flatMap((cli) => {
         const items: { label: string; cmd: string }[] = [
           { label: cli.name, cmd: cli.command },
@@ -144,6 +147,8 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
   private activeTabId: number = -1;
   private nextTabId: number = 1;
   private isRestoring: boolean = false;
+  private imageCounters = new Map<number, number>();
+  private pendingImages = new Map<number, { filePath: string; counter: number }[]>();
 
   constructor(private readonly ctx: vscode.ExtensionContext) {}
 
@@ -180,46 +185,9 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
     );
 
     webviewView.webview.onDidReceiveMessage((msg: any) => {
+      const builtin = BUILTIN_CLIS.find(c => c.msgCmd === msg.command);
+      if (builtin) { this.launch(builtin.cmd, builtin.label); return; }
       switch (msg.command) {
-        case "open-gemini":
-          this.launch("gemini");
-          break;
-        case "open-gemini-yolo":
-          this.launch("gemini -y");
-          break;
-        case "open-claude":
-          this.launch("claude");
-          break;
-        case "open-claude-yolo":
-          this.launch("claude --dangerously-skip-permissions");
-          break;
-        case "open-codex":
-          this.launch("codex");
-          break;
-        case "open-codex-yolo":
-          this.launch("codex --dangerously-bypass-approvals-and-sandbox");
-          break;
-        case "open-opencode":
-          this.launch("opencode");
-          break;
-        case "open-pi":
-          this.launch("pi");
-          break;
-        case "open-openclaude":
-          this.launch("openclaude");
-          break;
-        case "open-openclaude-yolo":
-          this.launch("openclaude --dangerously-skip-permissions");
-          break;
-        case "open-kilo":
-          this.launch("kilo");
-          break;
-        case "open-command-code":
-          this.launch("npx command-code");
-          break;
-        case "open-command-code-yolo":
-          this.launch("npx command-code --yolo");
-          break;
         case "input":
           if (msg.tabId !== undefined) {
             this.tabs.get(msg.tabId)?.pty?.write(msg.data);
@@ -252,9 +220,16 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
           const b64: string = msg.data;
           const mimeType: string = typeof msg.mimeType === "string" ? msg.mimeType : "image/png";
           const ext = (mimeType.split("/")[1] || "png").replace(/[^a-z0-9]/g, "");
-          const tmpFile = path.join(os.tmpdir(), `pivotcli-paste-${Date.now()}.${ext}`);
+          const imgCount = (this.imageCounters.get(tabId) ?? 0) + 1;
+          const tmpDir = process.platform === 'win32' ? os.tmpdir() : '/tmp';
+          const tmpFile = path.join(tmpDir, `img${tabId}-${imgCount}.${ext}`);
           fs.writeFileSync(tmpFile, Buffer.from(b64, "base64"));
+          this.imageCounters.set(tabId, imgCount);
+          const pending = this.pendingImages.get(tabId) ?? [];
+          pending.push({ filePath: tmpFile, counter: imgCount });
+          this.pendingImages.set(tabId, pending);
           this.tabs.get(tabId)?.pty?.write(tmpFile);
+          setTimeout(() => { try { fs.unlinkSync(tmpFile); } catch {} }, 30_000);
           break;
         }
       }
@@ -266,22 +241,7 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
   }
 
   public launch(cmd: string, labelOverride?: string) {
-    const labels: Record<string, string> = {
-      "gemini": "Gemini",
-      "gemini -y": "Gemini YOLO",
-      "claude": "Claude",
-      "claude --dangerously-skip-permissions": "Claude YOLO",
-      "codex": "Codex",
-      "codex --dangerously-bypass-approvals-and-sandbox": "Codex YOLO",
-      "opencode": "OpenCode",
-      "pi": "Pi Coding",
-      "openclaude": "OpenClaude",
-      "openclaude --dangerously-skip-permissions": "OpenClaude YOLO",
-      "kilo": "KiloCode",
-      "npx command-code": "CommandCode",
-      "npx command-code --yolo": "CommandCode YOLO",
-    };
-    const label = labelOverride ?? labels[cmd] ?? cmd;
+    const label = labelOverride ?? BUILTIN_CLIS.find(c => c.cmd === cmd)?.label ?? cmd;
 
     const tabId = this.nextTabId++;
     const tab: Tab = { id: tabId, label, cmd, pty: null };
@@ -300,6 +260,8 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
       try { tab.pty.kill(); } catch {}
     }
     this.tabs.delete(tabId);
+    this.imageCounters.delete(tabId);
+    this.pendingImages.delete(tabId);
     this.persistTabs();
 
     if (this.activeTabId === tabId) {
@@ -352,7 +314,18 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
       });
 
       tab.pty.onData((data: string) => {
-        this.post({ command: "output", tabId: tab.id, data });
+        let out = data;
+        const pending = this.pendingImages.get(tab.id);
+        if (pending && pending.length > 0) {
+          for (let i = pending.length - 1; i >= 0; i--) {
+            const { filePath: imgPath, counter } = pending[i];
+            if (out.includes(imgPath)) {
+              out = out.split(imgPath).join(`image ${counter}`);
+              pending.splice(i, 1);
+            }
+          }
+        }
+        this.post({ command: "output", tabId: tab.id, data: out });
       });
 
       tab.pty.onExit(() => {

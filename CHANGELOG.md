@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.1
+
+- **Fixed image paste double-send** — Ctrl+V image paste was sending two `paste-image` messages due to a microtask/macrotask race between the clipboard API and the browser paste event; now handled exclusively through the paste event listener
+- **Image paste display** — pasted images now display as `image 1`, `image 2`, etc. in the terminal instead of the raw temp file path
+- **Shorter temp filenames** — pasted images are saved as `img<tab>-<n>.<ext>` (e.g. `img1-1.png`) to avoid line-wrap in narrow terminals breaking path substitution
+- **Removed duplicate paste handler** — eliminated a document-level paste listener that was causing triple paste on some Ctrl+V operations
+
 ## 3.0.0
 
 - **Shift+Enter soft newline** — inserts a new line without submitting in all CLIs; Pi Coding uses the Kitty keyboard protocol sequence (`ESC[13;2u`) automatically

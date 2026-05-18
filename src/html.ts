@@ -320,10 +320,19 @@ export function getHtml(
       while (stripped.indexOf(esc) !== -1) {
         var i = stripped.indexOf(esc);
         var end = i + 1;
-        if (end < stripped.length && (stripped[end] === "[" || stripped[end] === "]")) {
+        if (end < stripped.length && stripped[end] === "[") {
+          // CSI: skip parameter/intermediate bytes then final byte
           end++;
           while (end < stripped.length && stripped.charCodeAt(end) >= 0x20 && stripped.charCodeAt(end) <= 0x3F) end++;
           if (end < stripped.length) end++;
+        } else if (end < stripped.length && stripped[end] === "]") {
+          // OSC: terminated by BEL (0x07) or ST (ESC backslash)
+          end++;
+          while (end < stripped.length) {
+            if (stripped.charCodeAt(end) === 0x07) { end++; break; }
+            if (stripped.charCodeAt(end) === 0x1B && end + 1 < stripped.length && stripped.charCodeAt(end + 1) === 0x5C) { end += 2; break; }
+            end++;
+          }
         }
         if (end === i + 1) end++; // always advance past ESC to prevent infinite loop
         stripped = stripped.substring(0, i) + stripped.substring(end);
@@ -486,69 +495,61 @@ export function getHtml(
         if ((event.key === 'Enter' || event.code === 'Enter') && event.shiftKey) {
           event.preventDefault();
           var tab = tabs.get(tabId);
-          var isPi = tab && tab.label && tab.label.toLowerCase().indexOf('pi') === 0;
+          var isPi = tab && tab.label === 'Pi Coding';
           var seq = isPi ? "\\x1b[13;2u" : "\\x1b\\r";
           vscode.postMessage({ command: "input", tabId: tabId, data: seq });
           return false;
         }
 
-        // Ctrl+V: paste text or image from clipboard
-        if (event.key === 'v' && event.ctrlKey && !event.altKey) {
-          var p = (typeof navigator.clipboard.read === 'function')
-            ? navigator.clipboard.read()
-            : Promise.reject(new Error('no clipboard.read'));
-          p.then(function(items) {
-            for (var i = 0; i < items.length; i++) {
-              var item = items[i];
-              var imgType = null;
-              for (var j = 0; j < item.types.length; j++) {
-                if (item.types[j].indexOf('image/') === 0) { imgType = item.types[j]; break; }
-              }
-              if (imgType) {
-                (function(it, mt) {
-                  it.getType(mt).then(function(blob) {
-                    var reader = new FileReader();
-                    reader.onload = function() {
-                      var b64 = reader.result.split(',')[1];
-                      vscode.postMessage({ command: "paste-image", tabId: tabId, data: b64, mimeType: mt });
-                    };
-                    reader.readAsDataURL(blob);
-                  });
-                })(item, imgType);
-                return;
-              }
-              if (item.types.indexOf('text/plain') >= 0) {
-                (function(it) {
-                  it.getType('text/plain').then(function(b) { return b.text(); }).then(function(text) {
-                    vscode.postMessage({ command: "input", tabId: tabId, data: text });
-                  });
-                })(item);
-                return;
-              }
-            }
-          }).catch(function() {
-            navigator.clipboard.readText().then(function(text) {
-              if (text) vscode.postMessage({ command: "input", tabId: tabId, data: text });
-            }).catch(function() {});
-          });
+        // Ctrl+V (Windows/Linux) or Cmd+V (macOS): suppress xterm's own handling; the paste event listener below does the work.
+        if (event.key === 'v' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+          event.preventDefault();
           return false;
         }
 
         return true;
       });
 
-      new ResizeObserver(() => {
+      t.resizeObserver = new ResizeObserver(() => {
         if (t.fitAddon && t.el.classList.contains("active")) {
           t.fitAddon.fit();
           vscode.postMessage({ command: "resize", tabId, cols: t.term.cols, rows: t.term.rows });
         }
-      }).observe(t.el);
+      });
+      t.resizeObserver.observe(t.el);
+
+      // Block xterm's built-in paste handler; handle context-menu paste here too.
+      t.el.addEventListener('paste', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        var cd = e.clipboardData;
+        if (!cd) return;
+        var imgType = null, imgIdx = -1;
+        for (var j = 0; j < cd.items.length; j++) {
+          if (cd.items[j].type.indexOf('image/') === 0) { imgType = cd.items[j].type; imgIdx = j; break; }
+        }
+        if (imgType && imgIdx >= 0) {
+          (function(mt, idx) {
+            var blob = cd.items[idx].getAsFile();
+            if (!blob) return;
+            var reader = new FileReader();
+            reader.onload = function() {
+              vscode.postMessage({ command: "paste-image", tabId: tabId, data: reader.result.split(',')[1], mimeType: mt });
+            };
+            reader.readAsDataURL(blob);
+          })(imgType, imgIdx);
+          return;
+        }
+        var text = cd.getData('text/plain');
+        if (text) vscode.postMessage({ command: "input", tabId: tabId, data: text });
+      }, true);
     }
 
     function removeTab(tabId, switchTo) {
       const t = tabs.get(tabId);
       if (t) {
         clearTimeout(t.idleTimer);
+        if (t.resizeObserver) t.resizeObserver.disconnect();
         if (t.term) t.term.dispose();
         if (t.el) t.el.remove();
         t.tabEl.remove();
@@ -721,32 +722,6 @@ export function getHtml(
 
       switchTab(localId);
     };
-
-    // Handle right-click → Paste for images (Ctrl+V is handled per-terminal in attachCustomKeyEventHandler)
-    document.addEventListener('paste', function(event) {
-      if (activeTabId < 0) return;
-      var t = tabs.get(activeTabId);
-      if (!t || t.isNewTab) return;
-      var items = event.clipboardData && event.clipboardData.items;
-      if (!items) return;
-      for (var i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image/') === 0) {
-          event.preventDefault();
-          (function(item, mt) {
-            var blob = item.getAsFile();
-            if (!blob) return;
-            var reader = new FileReader();
-            reader.onload = function() {
-              var b64 = reader.result.split(',')[1];
-              vscode.postMessage({ command: "paste-image", tabId: activeTabId, data: b64, mimeType: mt });
-            };
-            reader.readAsDataURL(blob);
-          })(items[i], items[i].type);
-          return;
-        }
-      }
-      // No image — let xterm handle text paste naturally
-    }, true);
 
     window.addEventListener("message", e => {
       const msg = e.data;
