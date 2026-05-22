@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.2
+## 3.0.5
 
 - Added Antigravity CLI support in the launcher with Normal mode (`agy`) and YOLO Mode (`agy --dangerously-skip-permissions`)
 - Added in-panel **Custom CLI Manager** — add, edit, and delete custom CLIs directly from the sidebar without opening settings

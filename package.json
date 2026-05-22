@@ -2,7 +2,7 @@
   "name": "pivotcli",
   "displayName": "PivotCLI",
   "description": "Sidebar panel to launch AI coding CLI tools — Claude, Codex, Gemini, Antigravity, OpenCode, Pi Coding, KiloCode, OpenClaude and CommandCode — with multi-tab support",
-  "version": "3.0.1",
+  "version": "3.0.5",
   "publisher": "KamrulHasan",
   "repository": {
     "type": "git",
