@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.2
+
+- Added Antigravity CLI support in the launcher with Normal mode (`agy`) and YOLO Mode (`agy --dangerously-skip-permissions`)
+- Added in-panel **Custom CLI Manager** — add, edit, and delete custom CLIs directly from the sidebar without opening settings
+- Custom CLI form now includes an optional **color picker** (swatch + hex input) so each custom CLI gets its own dot color
+- Added **Edit** button for saved custom CLIs — pre-fills the form and updates the entry in place
+- Fixed Custom CLI Manager not closing automatically after saving
+- Fixed custom CLI buttons appearing narrower than built-in CLI buttons
+- Fixed gaps missing between custom CLI buttons in the launcher
+- Launcher list now scrolls when content is taller than the panel; buttons are vertically centered when the manager is closed
+
 ## 3.0.1
 
 - **Fixed image paste double-send** — Ctrl+V image paste was sending two `paste-image` messages due to a microtask/macrotask race between the clipboard API and the browser paste event; now handled exclusively through the paste event listener

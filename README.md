@@ -2,7 +2,7 @@
 
 A VS Code extension that gives you a sidebar panel to launch AI coding CLI tools — right inside your editor. Run multiple sessions in tabs, switch between them, and multitask.
 
-Supports Claude, Codex, Gemini, OpenCode, Pi Coding, OpenClaude, KiloCode, CommandCode — and any custom CLI you configure.
+Supports Claude, Codex, Gemini, Antigravity, OpenCode, Pi Coding, OpenClaude, KiloCode, CommandCode — and any custom CLI you configure.
 
 <p align="center">
   <img src="images/Screenshot_2.png" alt="PivotCLI homepage" width="320">
@@ -17,6 +17,7 @@ Supports Claude, Codex, Gemini, OpenCode, Pi Coding, OpenClaude, KiloCode, Comma
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `claude` | `claude --dangerously-skip-permissions` |
 | [Codex CLI](https://github.com/openai/codex) | `codex` | `codex --dangerously-bypass-approvals-and-sandbox` |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) | `gemini` | `gemini -y` |
+| Antigravity CLI | `agy` | `agy --dangerously-skip-permissions` |
 | [OpenCode](https://github.com/opencode-ai/opencode) | `opencode` | — |
 | [Pi Coding](https://pi.dev) | `pi` | `pi` |
 | [OpenClaude](https://github.com/badkobzaar/openclaudecodecli) | `openclaude` | `openclaude --dangerously-skip-permissions` |
@@ -27,20 +28,22 @@ Supports Claude, Codex, Gemini, OpenCode, Pi Coding, OpenClaude, KiloCode, Comma
 ## Features
 
 - Launch any supported CLI from a clean homepage
-- **Custom CLI support** — add your own tools via `pivotcli.customCLIs` in settings, no extension update needed
+- **Custom CLI support** — add and remove your own tools directly from the panel, or manage them via `pivotcli.customCLIList` in settings
 - Multi-tab support — run multiple CLIs simultaneously
 - Flat square tab bar with activity indicators
 - **Tab persistence** — open tabs are restored automatically after VS Code restarts
-- YOLO mode for Gemini, Claude, Codex, OpenClaude & CommandCode
+- YOLO mode for Gemini, Antigravity, Claude, Codex, OpenClaude & CommandCode
 - Embedded terminal powered by xterm.js with full PTY support
 - Session history — quickly relaunch previous sessions
 
 ## Custom CLIs
 
-Add any CLI to the launcher panel via VS Code settings. Click **+ Add Custom CLI** in the panel, or edit `settings.json` directly:
+Add any CLI to the launcher panel from **+ Add Custom CLI** in the sidebar. Enter a name, command, optional YOLO command, and an optional color — then save. The CLI appears instantly in the launcher. You can **edit** or **delete** saved custom CLIs from the same manager.
+
+If you prefer, you can still edit `settings.json` directly:
 
 ```json
-"pivotcli.customCLIs": [
+"pivotcli.customCLIList": [
   {
     "name": "Aider",
     "command": "aider",
@@ -89,7 +92,7 @@ Then install the generated `.vsix` file.
 
 1. Click the **PivotCLI** icon in the Activity Bar
 2. Choose a CLI from the homepage (click to expand YOLO options)
-3. Click **+ Add Custom CLI** to configure your own tools
+3. Click **+ Add Custom CLI** to add or remove your own tools
 4. Click `+` to open more tabs while existing sessions keep running
 5. Switch between tabs — activity spinner shows which CLIs are working
 6. Use the history icon to relaunch previous sessions

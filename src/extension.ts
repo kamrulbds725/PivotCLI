@@ -4,10 +4,28 @@ import * as path from "path";
 import * as fs from "fs";
 import { getHtml, CustomCLI } from "./html";
 
-function getCustomCLIs(): CustomCLI[] {
+const CUSTOM_CLI_STORAGE_KEY = "pivotcli.customCLIList.storage";
+
+function getConfiguredCustomCLIs(): CustomCLI[] {
   return vscode.workspace
     .getConfiguration("pivotcli")
     .get<CustomCLI[]>("customCLIList", []);
+}
+
+function getCustomCLIStore(context: vscode.ExtensionContext): vscode.Memento {
+  return vscode.workspace.workspaceFolders?.length ? context.workspaceState : context.globalState;
+}
+
+function getCustomCLIs(context: vscode.ExtensionContext): CustomCLI[] {
+  const stored = getCustomCLIStore(context).get<CustomCLI[] | undefined>(CUSTOM_CLI_STORAGE_KEY);
+  if (stored !== undefined) {
+    return stored;
+  }
+  return getConfiguredCustomCLIs();
+}
+
+async function setCustomCLIs(context: vscode.ExtensionContext, customCLIs: CustomCLI[]) {
+  await getCustomCLIStore(context).update(CUSTOM_CLI_STORAGE_KEY, customCLIs);
 }
 
 function loadNodePty(): any {
@@ -33,6 +51,8 @@ interface BuiltinCLI { label: string; cmd: string; msgCmd: string; }
 const BUILTIN_CLIS: BuiltinCLI[] = [
   { label: "Gemini",             cmd: "gemini",                                           msgCmd: "open-gemini" },
   { label: "Gemini \u2014 YOLO", cmd: "gemini -y",                                        msgCmd: "open-gemini-yolo" },
+  { label: "Antigravity",        cmd: "agy",                                              msgCmd: "open-antigravity" },
+  { label: "Antigravity \u2014 YOLO", cmd: "agy --dangerously-skip-permissions",         msgCmd: "open-antigravity-yolo" },
   { label: "Claude",             cmd: "claude",                                            msgCmd: "open-claude" },
   { label: "Claude \u2014 YOLO", cmd: "claude --dangerously-skip-permissions",             msgCmd: "open-claude-yolo" },
   { label: "Codex",              cmd: "codex",                                             msgCmd: "open-codex" },
@@ -68,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("pivotcli.newSession", async () => {
       const builtins = BUILTIN_CLIS.map(c => ({ label: c.label, cmd: c.cmd }));
-      const customs = getCustomCLIs().flatMap((cli) => {
+      const customs = getCustomCLIs(context).flatMap((cli) => {
         const items: { label: string; cmd: string }[] = [
           { label: cli.name, cmd: cli.command },
         ];
@@ -90,6 +110,12 @@ export function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("pivotcli.openGeminiYolo", () => {
       provider.launch("gemini -y");
+    }),
+    vscode.commands.registerCommand("pivotcli.openAntigravity", () => {
+      provider.launch("agy");
+    }),
+    vscode.commands.registerCommand("pivotcli.openAntigravityYolo", () => {
+      provider.launch("agy --dangerously-skip-permissions");
     }),
     vscode.commands.registerCommand("pivotcli.openClaude", () => {
       provider.launch("claude");
@@ -171,20 +197,20 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
     const xtermJs = localRes("node_modules", "@xterm", "xterm", "lib", "xterm.js");
     const fitJs = localRes("node_modules", "@xterm", "addon-fit", "lib", "addon-fit.js");
 
-    webviewView.webview.html = getHtml(xtermCss, xtermJs, fitJs, getCustomCLIs());
+    webviewView.webview.html = getHtml(xtermCss, xtermJs, fitJs, getCustomCLIs(this.ctx));
 
     this.ctx.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration("pivotcli.customCLIList")) {
           this.view?.webview.postMessage({
             command: "update-custom-clis",
-            customCLIs: getCustomCLIs(),
+            customCLIs: getCustomCLIs(this.ctx),
           });
         }
       })
     );
 
-    webviewView.webview.onDidReceiveMessage((msg: any) => {
+    webviewView.webview.onDidReceiveMessage(async (msg: any) => {
       const builtin = BUILTIN_CLIS.find(c => c.msgCmd === msg.command);
       if (builtin) { this.launch(builtin.cmd, builtin.label); return; }
       switch (msg.command) {
@@ -207,6 +233,19 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
         case "open-custom":
           if (typeof msg.cmd === "string" && msg.cmd.length > 0) {
             this.launch(msg.cmd, typeof msg.label === "string" ? msg.label : undefined);
+          }
+          break;
+        case "add-custom-cli":
+          await this.addCustomCLI(msg);
+          break;
+        case "edit-custom-cli":
+          if (typeof msg.index === "number") {
+            await this.editCustomCLI(msg);
+          }
+          break;
+        case "delete-custom-cli":
+          if (typeof msg.index === "number") {
+            await this.deleteCustomCLI(msg.index);
           }
           break;
         case "open-custom-settings":
@@ -295,6 +334,85 @@ class PivotCLIProvider implements vscode.WebviewViewProvider {
     sessions.unshift({ cmd, label, timestamp: Date.now() });
     if (sessions.length > 10) { sessions.length = 10; }
     this.ctx.globalState.update("pivotcli.sessions", sessions);
+  }
+
+  private async updateCustomCLIs(customCLIs: CustomCLI[]) {
+    await setCustomCLIs(this.ctx, customCLIs);
+    this.post({ command: "update-custom-clis", customCLIs });
+  }
+
+  private async addCustomCLI(msg: any) {
+    const name = typeof msg.name === "string" ? msg.name.trim() : "";
+    const command = typeof msg.cliCommand === "string" ? msg.cliCommand.trim() : "";
+    const yoloCommand = typeof msg.yoloCommand === "string" ? msg.yoloCommand.trim() : "";
+
+    if (!name || !command) {
+      this.post({ command: "custom-cli-error", message: "Custom CLI name and command are required." });
+      vscode.window.showErrorMessage("Custom CLI name and command are required.");
+      return;
+    }
+
+    const customCLIs = getCustomCLIs(this.ctx);
+    const exists = customCLIs.some((cli) => cli.name.toLowerCase() === name.toLowerCase());
+    if (exists) {
+      this.post({ command: "custom-cli-error", message: `A custom CLI named \"${name}\" already exists.` });
+      vscode.window.showErrorMessage(`A custom CLI named \"${name}\" already exists.`);
+      return;
+    }
+
+    const rawColor = typeof msg.color === "string" ? msg.color.trim() : "";
+    const color = /^#[0-9a-fA-F]{6}$/.test(rawColor) ? rawColor : undefined;
+    const newCLI: CustomCLI = { name, command };
+    if (yoloCommand) { newCLI.yoloCommand = yoloCommand; }
+    if (color) { newCLI.color = color; }
+
+    await this.updateCustomCLIs([...customCLIs, newCLI]);
+    this.post({ command: "custom-cli-saved" });
+  }
+
+  private async deleteCustomCLI(index: number) {
+    const customCLIs = getCustomCLIs(this.ctx);
+    if (index < 0 || index >= customCLIs.length) {
+      return;
+    }
+
+    customCLIs.splice(index, 1);
+    await this.updateCustomCLIs(customCLIs);
+    this.post({ command: "custom-cli-deleted" });
+  }
+
+  private async editCustomCLI(msg: any) {
+    const index = msg.index as number;
+    const name = typeof msg.name === "string" ? msg.name.trim() : "";
+    const command = typeof msg.cliCommand === "string" ? msg.cliCommand.trim() : "";
+    const yoloCommand = typeof msg.yoloCommand === "string" ? msg.yoloCommand.trim() : "";
+    const rawColor = typeof msg.color === "string" ? msg.color.trim() : "";
+    const color = /^#[0-9a-fA-F]{6}$/.test(rawColor) ? rawColor : undefined;
+
+    if (!name || !command) {
+      this.post({ command: "custom-cli-error", message: "Custom CLI name and command are required." });
+      return;
+    }
+
+    const customCLIs = getCustomCLIs(this.ctx);
+    if (index < 0 || index >= customCLIs.length) {
+      this.post({ command: "custom-cli-error", message: "Invalid CLI index." });
+      return;
+    }
+
+    // Allow same name if it belongs to the item being edited
+    const duplicate = customCLIs.some((cli, i) => i !== index && cli.name.toLowerCase() === name.toLowerCase());
+    if (duplicate) {
+      this.post({ command: "custom-cli-error", message: `A custom CLI named "${name}" already exists.` });
+      return;
+    }
+
+    const updated: CustomCLI = { name, command };
+    if (yoloCommand) { updated.yoloCommand = yoloCommand; }
+    if (color) { updated.color = color; }
+    customCLIs[index] = updated;
+    await this.updateCustomCLIs(customCLIs);
+    this.post({ command: "custom-cli-saved" });
   }
 
   private spawnPty(tab: Tab) {

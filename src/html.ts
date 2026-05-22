@@ -31,7 +31,10 @@ export function getHtml(
     #buttons {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 6px;
-      padding: 24px 16px;
+      padding: 24px 16px; overflow-y: auto;
+    }
+    #buttons.manager-open {
+      justify-content: flex-start;
     }
     .btn-group {
       width: 100%; max-width: 260px;
@@ -115,6 +118,122 @@ export function getHtml(
       font-size: 10px; color: rgba(255,255,255,0.45);
       max-width: 260px; text-align: center; margin-top: 5px;
       line-height: 1.4;
+    }
+    .custom-manager {
+      width: 100%; max-width: 260px;
+      margin-top: 10px; padding: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      display: none;
+      gap: 10px;
+      flex-direction: column;
+    }
+    .custom-manager.open { display: flex; }
+    .custom-manager-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .custom-manager-title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.8px; color: rgba(255,255,255,0.78);
+    }
+    .custom-manager-close {
+      border: none; background: transparent; color: rgba(255,255,255,0.45);
+      cursor: pointer; font-size: 18px; line-height: 1;
+      width: 22px; height: 22px;
+    }
+    .custom-manager-close:hover { color: var(--vscode-foreground); }
+    .custom-field {
+      display: flex; flex-direction: column; gap: 5px;
+      font-size: 11px; color: rgba(255,255,255,0.65);
+    }
+    .custom-field input {
+      width: 100%; padding: 8px 10px;
+      border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.18); color: var(--vscode-foreground);
+      outline: none; font-size: 12px;
+    }
+    .custom-field input:focus {
+      border-color: var(--vscode-focusBorder);
+    }
+    .custom-field-optional {
+      color: rgba(255,255,255,0.35); font-size: 10px;
+    }
+    .custom-form-error {
+      min-height: 16px;
+      font-size: 11px; color: #f28b82;
+    }
+    .custom-color-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .custom-color-input {
+      width: 36px; height: 28px; padding: 2px 3px;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+      background: rgba(0,0,0,0.18); cursor: pointer;
+    }
+    .custom-color-hex {
+      flex: 1; padding: 6px 10px;
+      border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.18); color: var(--vscode-foreground);
+      outline: none; font-size: 12px; font-family: monospace;
+    }
+    .custom-color-hex:focus { border-color: var(--vscode-focusBorder); }
+    .custom-manager-actions {
+      display: flex; gap: 8px;
+    }
+    .custom-save-btn,
+    .custom-settings-btn,
+    .custom-delete-btn,
+    .custom-edit-btn {
+      border: none; border-radius: 6px; cursor: pointer;
+      font-size: 11px; padding: 8px 10px;
+    }
+    .custom-save-btn {
+      flex: 1;
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+    }
+    .custom-save-btn:hover { background: var(--vscode-button-hoverBackground); }
+    .custom-settings-btn {
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75);
+    }
+    .custom-settings-btn:hover { background: rgba(255,255,255,0.14); color: var(--vscode-foreground); }
+    .custom-manager-subtitle {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 2px;
+    }
+    .custom-cli-list {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .custom-cli-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.04);
+    }
+    .custom-cli-meta {
+      min-width: 0; display: flex; flex-direction: column; gap: 2px;
+    }
+    .custom-cli-name {
+      font-size: 12px; color: var(--vscode-foreground); font-weight: 500;
+    }
+    .custom-cli-command,
+    .custom-cli-yolo {
+      font-size: 10px; color: rgba(255,255,255,0.5);
+      word-break: break-all;
+    }
+    .custom-delete-btn,
+    .custom-edit-btn {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
+    }
+    .custom-delete-btn:hover,
+    .custom-edit-btn:hover { background: rgba(255,255,255,0.14); color: var(--vscode-foreground); }
+    .custom-row-actions {
+      display: flex; flex-direction: row; gap: 4px; flex-shrink: 0;
+    }
+    .custom-empty {
+      font-size: 11px; color: rgba(255,255,255,0.45);
+      padding: 4px 0;
     }
 
     #tab-bar {
@@ -256,6 +375,16 @@ export function getHtml(
       </div>
     </div>
 
+    <div class="btn-group">
+      <button class="launch-btn expandable" data-group="antigravity">
+        <span class="btn-icon" style="background:#f4b400"></span>Antigravity<span class="btn-arrow">&#9656;</span>
+      </button>
+      <div class="sub-items" data-for="antigravity">
+        <button class="sub-item" data-cmd="open-antigravity"><span class="sub-dot"></span>Normal</button>
+        <button class="sub-item" data-cmd="open-antigravity-yolo"><span class="sub-dot"></span>YOLO Mode</button>
+      </div>
+    </div>
+
     <button class="launch-btn" id="btn-opencode">
       <span class="btn-icon" style="background:#34a853"></span>OpenCode<span class="btn-arrow">&#9656;</span>
     </button>
@@ -284,10 +413,42 @@ export function getHtml(
       </div>
     </div>
 
-    <div id="custom-clis"></div>
-    <button id="add-custom-cli-btn" class="add-custom-btn" title="Opens pivotcli.customCLIList in VS Code Settings">
+    <div id="custom-clis" style="width:100%;max-width:260px;display:flex;flex-direction:column;gap:6px;"></div>
+    <button id="add-custom-cli-btn" class="add-custom-btn" title="Add a custom CLI without opening settings">
       <span class="add-icon">+</span> Add Custom CLI
     </button>
+    <div id="custom-cli-manager" class="custom-manager">
+      <div class="custom-manager-header">
+        <div class="custom-manager-title">Custom CLI Manager</div>
+        <button id="close-custom-cli-manager" class="custom-manager-close" title="Close">&times;</button>
+      </div>
+      <label class="custom-field">
+        <span>CLI Name</span>
+        <input id="custom-cli-name" type="text" maxlength="60" placeholder="Aider" />
+      </label>
+      <label class="custom-field">
+        <span>Command</span>
+        <input id="custom-cli-command" type="text" maxlength="300" placeholder="aider" />
+      </label>
+      <label class="custom-field">
+        <span>YOLO Command <span class="custom-field-optional">optional</span></span>
+        <input id="custom-cli-yolo" type="text" maxlength="300" placeholder="aider --yes" />
+      </label>
+      <label class="custom-field">
+        <span>Color <span class="custom-field-optional">optional</span></span>
+        <div class="custom-color-row">
+          <input id="custom-cli-color" type="color" class="custom-color-input" value="#888888" />
+          <input id="custom-cli-color-hex" type="text" class="custom-color-hex" maxlength="7" placeholder="#888888" />
+        </div>
+      </label>
+      <div id="custom-cli-form-error" class="custom-form-error"></div>
+      <div class="custom-manager-actions">
+        <button id="save-custom-cli-btn" class="custom-save-btn">Add CLI</button>
+        <button id="open-custom-settings-link" class="custom-settings-btn">Settings</button>
+      </div>
+      <div class="custom-manager-subtitle">Saved CLIs</div>
+      <div id="custom-cli-list" class="custom-cli-list"></div>
+    </div>
   </div>
   <div id="loading">
     <div class="spinner"></div>
@@ -306,6 +467,21 @@ export function getHtml(
     const loadingDiv = document.getElementById("loading");
     const loadingText = loadingDiv.querySelector(".loading-text");
     const terminalsDiv = document.getElementById("terminals");
+    const customManager = document.getElementById("custom-cli-manager");
+    const customCLIList = document.getElementById("custom-cli-list");
+    const customCLIName = document.getElementById("custom-cli-name");
+    const customCLICommand = document.getElementById("custom-cli-command");
+    const customCLIYolo = document.getElementById("custom-cli-yolo");
+    const customCLIColorPicker = document.getElementById("custom-cli-color");
+    const customCLIColorHex = document.getElementById("custom-cli-color-hex");
+    const saveBtn = document.getElementById("save-custom-cli-btn");
+    let editingIndex = -1;
+    customCLIColorPicker.addEventListener("input", () => { customCLIColorHex.value = customCLIColorPicker.value; });
+    customCLIColorHex.addEventListener("input", () => {
+      const v = customCLIColorHex.value.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(v)) { customCLIColorPicker.value = v; }
+    });
+    const customCLIFormError = document.getElementById("custom-cli-form-error");
 
     // Track all tabs: { id, label, term, fitAddon, el, tabEl, gotFirstOutput, idleTimer, isNewTab }
     const tabs = new Map();
@@ -356,6 +532,49 @@ export function getHtml(
         t.tabEl.classList.remove("busy");
         t.outputAccum = 0;
       }, IDLE_DELAY);
+    }
+
+    function setCustomCLIError(message) {
+      customCLIFormError.textContent = message || "";
+    }
+
+    function openCustomCLIManager() {
+      customManager.classList.add("open");
+      document.getElementById("buttons").classList.add("manager-open");
+      setCustomCLIError("");
+      customCLIName.focus();
+    }
+
+    function openForEdit(cli, index) {
+      editingIndex = index;
+      customCLIName.value = cli.name || "";
+      customCLICommand.value = cli.command || "";
+      customCLIYolo.value = cli.yoloCommand || "";
+      const c = cli.color || "#888888";
+      customCLIColorPicker.value = c;
+      customCLIColorHex.value = c;
+      saveBtn.textContent = "Update CLI";
+      customManager.classList.add("open");
+      document.getElementById("buttons").classList.add("manager-open");
+      setCustomCLIError("");
+      customCLIName.focus();
+    }
+
+    function resetForm() {
+      editingIndex = -1;
+      customCLIName.value = "";
+      customCLICommand.value = "";
+      customCLIYolo.value = "";
+      customCLIColorPicker.value = "#888888";
+      customCLIColorHex.value = "";
+      saveBtn.textContent = "Add CLI";
+      setCustomCLIError("");
+    }
+
+    function closeCustomCLIManager() {
+      customManager.classList.remove("open");
+      document.getElementById("buttons").classList.remove("manager-open");
+      resetForm();
     }
 
     function switchTab(tabId) {
@@ -596,19 +815,58 @@ export function getHtml(
     document.getElementById("btn-kilo").onclick = () =>
       vscode.postMessage({ command: "open-kilo" });
     document.getElementById("add-custom-cli-btn").onclick = () =>
+      openCustomCLIManager();
+    document.getElementById("close-custom-cli-manager").onclick = () =>
+      closeCustomCLIManager();
+    document.getElementById("open-custom-settings-link").onclick = () =>
       vscode.postMessage({ command: "open-custom-settings" });
+    document.getElementById("save-custom-cli-btn").onclick = () => {
+      const name = customCLIName.value.trim();
+      const command = customCLICommand.value.trim();
+      const yoloCommand = customCLIYolo.value.trim();
+      const color = customCLIColorHex.value.trim() || customCLIColorPicker.value;
+
+      if (!name || !command) {
+        setCustomCLIError("Name and command are required.");
+        return;
+      }
+
+      setCustomCLIError("");
+      if (editingIndex >= 0) {
+        vscode.postMessage({ command: "edit-custom-cli", index: editingIndex, name, cliCommand: command, yoloCommand, color });
+      } else {
+        vscode.postMessage({ command: "add-custom-cli", name, cliCommand: command, yoloCommand, color });
+      }
+    };
+
+    [customCLIName, customCLICommand, customCLIYolo].forEach(input => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("save-custom-cli-btn").click();
+        }
+      });
+    });
 
     // Custom CLIs (from pivotcli.customCLIs setting)
     function renderCustomCLIs(customs) {
       const container = document.getElementById("custom-clis");
       container.innerHTML = "";
-      if (!customs || !customs.length) { return; }
+      customCLIList.innerHTML = "";
+
+      if (!customs || !customs.length) {
+        const empty = document.createElement("div");
+        empty.className = "custom-empty";
+        empty.textContent = "No custom CLIs added yet.";
+        customCLIList.appendChild(empty);
+        return;
+      }
 
       const sep = document.createElement("div");
       sep.className = "custom-sep";
       container.appendChild(sep);
 
-      customs.forEach(function(cli) {
+      customs.forEach(function(cli, index) {
         // Validate color to prevent CSS injection
         const color = /^[a-zA-Z0-9#(),. %]+$/.test(cli.color || "") ? cli.color : "#888888";
 
@@ -671,6 +929,52 @@ export function getHtml(
           });
           container.appendChild(btn);
         }
+
+        const row = document.createElement("div");
+        row.className = "custom-cli-row";
+
+        const meta = document.createElement("div");
+        meta.className = "custom-cli-meta";
+
+        const name = document.createElement("div");
+        name.className = "custom-cli-name";
+        name.textContent = cli.name;
+        meta.appendChild(name);
+
+        const command = document.createElement("div");
+        command.className = "custom-cli-command";
+        command.textContent = cli.command;
+        meta.appendChild(command);
+
+        if (cli.yoloCommand) {
+          const yolo = document.createElement("div");
+          yolo.className = "custom-cli-yolo";
+          yolo.textContent = "YOLO: " + cli.yoloCommand;
+          meta.appendChild(yolo);
+        }
+
+        const del = document.createElement("button");
+        del.className = "custom-delete-btn";
+        del.textContent = "Delete";
+        del.addEventListener("click", function() {
+          vscode.postMessage({ command: "delete-custom-cli", index: index });
+        });
+
+        const edit = document.createElement("button");
+        edit.className = "custom-edit-btn";
+        edit.textContent = "Edit";
+        edit.addEventListener("click", function() {
+          openForEdit(cli, index);
+        });
+
+        const actions = document.createElement("div");
+        actions.className = "custom-row-actions";
+        actions.appendChild(edit);
+        actions.appendChild(del);
+
+        row.appendChild(meta);
+        row.appendChild(actions);
+        customCLIList.appendChild(row);
       });
     }
 
@@ -728,6 +1032,13 @@ export function getHtml(
 
       if (msg.command === "update-custom-clis") {
         renderCustomCLIs(msg.customCLIs || []);
+      } else if (msg.command === "custom-cli-saved") {
+        resetForm();
+        closeCustomCLIManager();
+      } else if (msg.command === "custom-cli-deleted") {
+        setCustomCLIError("");
+      } else if (msg.command === "custom-cli-error") {
+        setCustomCLIError(msg.message || "Unable to save custom CLI.");
       } else if (msg.command === "new-tab") {
         createTab(msg.tabId, msg.label);
       } else if (msg.command === "output") {
