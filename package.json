@@ -1,8 +1,8 @@
 {
   "name": "pivotcli",
   "displayName": "PivotCLI",
-  "description": "Sidebar panel to launch AI coding CLI tools — Claude, Codex, Gemini, Antigravity, OpenCode, Pi Coding, KiloCode, OpenClaude and CommandCode — with multi-tab support",
-  "version": "3.0.5",
+  "description": "Sidebar panel to launch AI coding CLI tools — Claude, Codex, Antigravity, OpenCode, Pi Coding, KiloCode, OpenClaude and CommandCode — with multi-tab support",
+  "version": "3.0.7",
   "publisher": "KamrulHasan",
   "repository": {
     "type": "git",
@@ -24,14 +24,6 @@
         "command": "pivotcli.newSession",
         "title": "New Session",
         "icon": "$(add)"
-      },
-      {
-        "command": "pivotcli.openGemini",
-        "title": "Gemini"
-      },
-      {
-        "command": "pivotcli.openGeminiYolo",
-        "title": "Gemini — YOLO"
       },
       {
         "command": "pivotcli.openAntigravity",

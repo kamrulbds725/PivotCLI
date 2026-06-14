@@ -49,8 +49,6 @@ interface Tab {
 
 interface BuiltinCLI { label: string; cmd: string; msgCmd: string; }
 const BUILTIN_CLIS: BuiltinCLI[] = [
-  { label: "Gemini",             cmd: "gemini",                                           msgCmd: "open-gemini" },
-  { label: "Gemini \u2014 YOLO", cmd: "gemini -y",                                        msgCmd: "open-gemini-yolo" },
   { label: "Antigravity",        cmd: "agy",                                              msgCmd: "open-antigravity" },
   { label: "Antigravity \u2014 YOLO", cmd: "agy --dangerously-skip-permissions",         msgCmd: "open-antigravity-yolo" },
   { label: "Claude",             cmd: "claude",                                            msgCmd: "open-claude" },
@@ -104,12 +102,6 @@ export function activate(context: vscode.ExtensionContext) {
       if (picked) {
         provider.launch(picked.cmd, picked.label);
       }
-    }),
-    vscode.commands.registerCommand("pivotcli.openGemini", () => {
-      provider.launch("gemini");
-    }),
-    vscode.commands.registerCommand("pivotcli.openGeminiYolo", () => {
-      provider.launch("gemini -y");
     }),
     vscode.commands.registerCommand("pivotcli.openAntigravity", () => {
       provider.launch("agy");

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.7
+
+- Removed Gemini CLI support (replaced by Antigravity CLI)
+
 ## 3.0.5
 
 - Added Antigravity CLI support in the launcher with Normal mode (`agy`) and YOLO Mode (`agy --dangerously-skip-permissions`)

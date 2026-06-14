@@ -2,12 +2,12 @@
 
 A VS Code extension that gives you a sidebar panel to launch AI coding CLI tools — right inside your editor. Run multiple sessions in tabs, switch between them, and multitask.
 
-Supports Claude, Codex, Gemini, Antigravity, OpenCode, Pi Coding, OpenClaude, KiloCode, CommandCode — and any custom CLI you configure.
+Supports Claude, Codex, Antigravity, OpenCode, Pi Coding, OpenClaude, KiloCode, CommandCode — and any custom CLI you configure.
 
 <p align="center">
   <img src="images/Screenshot_2.png" alt="PivotCLI homepage" width="320">
   &nbsp;&nbsp;
-  <img src="images/Screenshot_1.png" alt="PivotCLI session" width="200">
+  <img src="images/Screenshot_1.png" alt="PivotCLI session" width="320">
 </p>
 
 ## Supported CLIs
@@ -16,8 +16,7 @@ Supports Claude, Codex, Gemini, Antigravity, OpenCode, Pi Coding, OpenClaude, Ki
 |-----|--------|-----------|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `claude` | `claude --dangerously-skip-permissions` |
 | [Codex CLI](https://github.com/openai/codex) | `codex` | `codex --dangerously-bypass-approvals-and-sandbox` |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | `gemini` | `gemini -y` |
-| Antigravity CLI | `agy` | `agy --dangerously-skip-permissions` |
+| [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | `agy` | `agy --dangerously-skip-permissions` |
 | [OpenCode](https://github.com/opencode-ai/opencode) | `opencode` | — |
 | [Pi Coding](https://pi.dev) | `pi` | `pi` |
 | [OpenClaude](https://github.com/badkobzaar/openclaudecodecli) | `openclaude` | `openclaude --dangerously-skip-permissions` |
@@ -32,7 +31,7 @@ Supports Claude, Codex, Gemini, Antigravity, OpenCode, Pi Coding, OpenClaude, Ki
 - Multi-tab support — run multiple CLIs simultaneously
 - Flat square tab bar with activity indicators
 - **Tab persistence** — open tabs are restored automatically after VS Code restarts
-- YOLO mode for Gemini, Antigravity, Claude, Codex, OpenClaude & CommandCode
+- YOLO mode for Antigravity, Claude, Codex, OpenClaude & CommandCode
 - Embedded terminal powered by xterm.js with full PTY support
 - Session history — quickly relaunch previous sessions
 

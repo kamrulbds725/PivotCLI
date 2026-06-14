@@ -366,16 +366,6 @@ export function getHtml(
     </div>
 
     <div class="btn-group">
-      <button class="launch-btn expandable" data-group="gemini">
-        <span class="btn-icon" style="background:#4285f4"></span>Gemini<span class="btn-arrow">&#9656;</span>
-      </button>
-      <div class="sub-items" data-for="gemini">
-        <button class="sub-item" data-cmd="open-gemini"><span class="sub-dot"></span>Normal</button>
-        <button class="sub-item" data-cmd="open-gemini-yolo"><span class="sub-dot"></span>YOLO Mode</button>
-      </div>
-    </div>
-
-    <div class="btn-group">
       <button class="launch-btn expandable" data-group="antigravity">
         <span class="btn-icon" style="background:#f4b400"></span>Antigravity<span class="btn-arrow">&#9656;</span>
       </button>
